@@ -65,7 +65,7 @@ post_data = (data, cb) => {
 
 /* Scan and log devices*/
 scan = () => {
-    display.write_text(`${serial_id}Scanning for safedome devices ...`);
+    display.write_text(`${serial_id}\nScanning for safedome devices ...`);
     let dir = exec("sudo btmgmt find", function(_, stdout, __) {
         let data = stdout.split("\n");
 
@@ -98,7 +98,7 @@ scan = () => {
             }
         })
 
-        display.write_text(`${serial_id}Found ${results.length} safedome devices.`)
+        display.write_text(`${serial_id}\nFound ${results.length} safedome devices.`)
         console.log(`[${get_timestamp()}] Found ${results.length} safedome devices.`);
 
 
