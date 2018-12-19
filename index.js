@@ -93,15 +93,16 @@ let validate_connection_and_scan = () => {
 
                         // found a network, reset the network settings to use this network.
                         display.write_text(`Found preconfigured network\nUpdating network config.`);
-                        let custom_network_config = `network={\n\tssid='${body.detail[0].username}'\n\tpsk='${body.detail[0].password}'\n\tkey_mgmt=WPA-PSK\n}\n`;
+
+                        //let custom_network_config = `network={\n\tssid='${body.detail[0].username}'\n\tpsk='${body.detail[0].password}'\n\tkey_mgmt=WPA-PSK\n}\n`;
 
                         console.log("calling network update script");
                         let network_update_script = exec(
-                            `sudo echo "${base_network_config + custom_network_config}" > ./temp.conf && sudo cp ./temp.conf /etc/wpa_supplicant/wpa_supplicant.conf && sudo ifconfig wlan0 down && sudo ifconfig wlan0 up`, 
+                            `wpa_cli add_network 0; wpa_cli save_config; sudo sh -c 'wpa_passphrase ${ody.detail[0].username} ${body.detail[0].password} >> /etc/wpa_supplicant/wpa_supplicant.conf'; sudo systemctl daemon-reload; sudo systemctl restart dhcpcd;`, 
                             function(_, stdout, stderr) {
                                 setTimeout(
                                     validate_connection_and_scan,
-                                    SCAN_INTERVAL
+                                    10000
                                 );
                             }
                         );
@@ -217,7 +218,7 @@ let scan = () => {
 
 /* set the base network config if its not set */
 let set_base_network_config = exec(
-    `if grep -q safedome "/etc/wpa_supplicant/wpa_supplicant.conf"; then echo ""; else echo "${base_network_config}" > ./temp.conf && sudo cp ./temp.conf /etc/wpa_supplicant/wpa_supplicant.conf && sudo ifconfig wlan0 down && sudo ifconfig wlan0 up; fi`,
+    `wpa_cli remove_network 0;wpa_cli remove_network 1;wpa_cli remove_network 2;wpa_cli remove_network 3;wpa_cli remove_network 4;wpa_cli remove_network 5;wpa_cli remove_network 6;wpa_cli remove_network 7;wpa_cli remove_network 8;wpa_cli remove_network 9;wpa_cli remove_network 10; wpa_cli save_config; wpa_cli add_network 0; wpa_cli save_config; sudo sh -c 'wpa_passphrase safedome0123 safe0123 >> /etc/wpa_supplicant/wpa_supplicant.conf';sudo systemctl daemon-reload; sudo systemctl restart dhcpcd;`,
     function(_, stdout, stderr) {
         console.log(stdout);
         console.log(stderr);
