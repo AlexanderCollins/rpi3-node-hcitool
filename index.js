@@ -117,7 +117,7 @@ scan = () => {
 
 
 /* Get the serial number */
-let get_id = exec("sudo cat /proc/cpuinfo | grep Serial | tr -s ' ' | cut -d ' ' -f3", function(_, stdout, stderr) {
+let get_id = exec("sudo cat /proc/cpuinfo | grep Serial | sed 's/ //g' | cut -d ':' -f2", function(_, stdout, stderr) {
     console.log(stdout);
     console.log(stderr);
     serial_id = stdout;
