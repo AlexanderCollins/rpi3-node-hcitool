@@ -31,7 +31,7 @@ class Display {
  */
 let SCAN_INTERVAL = 5000;
 
-let display = Display();
+let display = new Display();
 display.write_text(`Initialising Safedome Bluetooth Scanner.`);
 
 let get_timestamp = () => {
