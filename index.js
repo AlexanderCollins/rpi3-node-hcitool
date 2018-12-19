@@ -69,7 +69,6 @@ async function post_data(data){
 
 let validate_connection_and_scan = () => {
     let validation_check = exec("ping -q -w 1 -c 1 `ip r | grep default | cut -d ' ' -f 3` > /dev/null && echo ok || echo error", function(_, stdout, __){
-        console.log(stdout)
         if(stdout == "ok\n") {
             console.log(`[${get_timestamp()}] Found Network`);
             setTimeout(
@@ -78,7 +77,7 @@ let validate_connection_and_scan = () => {
             )
         } else {
             console.log(`[${get_timestamp()}] Waiting for network.`);
-            display.write_text(`${serial_id}\nWaiting for network ssid: safedome0123 pass: Safe0123 or other preconfigured.`);
+            display.write_text(`Waiting for network ssid: safedome0123 pass: Safe0123 or other.`);
             setTimeout(
                 validate_connection_and_scan,
                 SCAN_INTERVAL
