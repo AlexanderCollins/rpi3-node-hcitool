@@ -105,7 +105,7 @@ scan = () => {
                 "timestamp": get_timestamp(),
                 "device": serial_id
             };
-            console.log(`[${get_timestamp()}] ${payload}`);
+            console.log(`[${get_timestamp()}] ${JSON.stringify(payload)}`);
         }
 
         setTimeout(scan, SCAN_INTERVAL);
