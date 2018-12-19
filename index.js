@@ -106,4 +106,4 @@ scan = () => {
 };
 
 /* Begin Logging */
-//setTimeout(scan, SCAN_INTERVAL);
+setTimeout(scan, SCAN_INTERVAL);
