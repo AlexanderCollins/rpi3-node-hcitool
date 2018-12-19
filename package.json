@@ -1,0 +1,29 @@
+{
+  "name": "rpi3-node-hcitool",
+  "version": "1.0.0",
+  "description": "Raspberry PI 3 Node Hcitool Wrapper",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "./node_modules/.bin/eslint index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlexanderCollins/rpi3-node-hcitool.git"
+  },
+  "author": "Alexander W. Collins",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AlexanderCollins/rpi3-node-hcitool/issues"
+  },
+  "homepage": "https://github.com/AlexanderCollins/rpi3-node-hcitool#readme",
+  "dependencies": {
+    "bluebird": "^3.5.3",
+    "node-cmd": "^3.0.0",
+    "request": "^2.88.0"
+  },
+  "devDependencies": {
+    "eslint": "^5.10.0",
+    "lint": "^1.1.2"
+  }
+}
