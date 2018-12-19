@@ -96,7 +96,7 @@ let validate_connection_and_scan = () => {
 
                         console.log("calling network update script");
                         let network_update_script = exec(
-                            `sudo echo "${base_network_config + custom_network_config}" > /etc/wpa_supplicant/wpa_supplicant.conf`, 
+                            `sudo echo "${base_network_config + custom_network_config}" > ./temp.conf && sudo cp ./temp.conf /etc/wpa_supplicant/wpa_supplicant.conf`, 
                             function(_, stdout, stderr) {
                                 console.log(stdout);
                                 console.log(stderr);
