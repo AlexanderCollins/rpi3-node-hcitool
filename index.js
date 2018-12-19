@@ -5,6 +5,8 @@ const { exec } = require('child_process');
 let i2c = require('i2c-bus');
 let oled = require('oled-i2c-bus');
 
+let base_network_config = "ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\ncountry=AU\n\nnetwork={\n\tssid='safedome0123'\n\tpsk='safe0123'\n\tkey_mgmt=WPA-PSK\n}\n\n";
+
 /* initalise serial id */
 let serial_id;
 
@@ -89,7 +91,6 @@ let validate_connection_and_scan = () => {
 
                         // found a network, reset the network settings to use this network.
                         display.write_text(`Found preconfigured network\nUpdating network config.`);
-                        let base_network_config = "ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\ncountry=AU\n\nnetwork={\n\tssid='safedome0123'\n\tpsk='safe0123'\n\tkey_mgmt=WPA-PSK\n}\n\n";
                         let custom_network_config = `network={\n\tssid='${body.detail[0].username}'\n\tpsk='${body.detail[0].password}'\n\tkey_mgmt=WPA-PSK\n}\n`;
 
                         console.log("calling network update script");
@@ -194,16 +195,27 @@ let scan = () => {
 };
 
 
-/* Get the serial number */
-let get_id = exec("sudo cat /proc/cpuinfo | grep Serial | sed 's/ //g' | cut -d ':' -f2", function(_, stdout, stderr) {
-    console.log(`[${get_timestamp()}] Found device serial id ${stdout}.`);
-    serial_id = stdout;
-    serial_id = serial_id.replace('\n', '');
-    return;
+/* set the base network config if its not set */
+let set_base_network_config = exec(
+    `if [ $(cat /etc/wpa_supplicant/wpa_supplicant.conf | grep "safedome") -eq 0 ]; then $(echo "${base_network_config}" > ./temp.conf && sudo cp ./temp.conf /etc/wpa_supplicant/wpa_supplicant.conf && sudo ifconfig wlan0 down && sudo ifconfig wlan0 up) ; fi`,
+    function(_, stdout, stderr) {
+        /* Get the serial number */
+        let get_id = exec("sudo cat /proc/cpuinfo | grep Serial | sed 's/ //g' | cut -d ':' -f2", function(_, stdout, stderr) {
+            console.log(`[${get_timestamp()}] Found device serial id ${stdout}.`);
+            serial_id = stdout;
+            serial_id = serial_id.replace('\n', '');
+            return;
+        });
+
+        get_id.on('exit', function(code) {
+            /* Begin Logging */
+            console.log(`[${get_timestamp()}] <get device serial id> command line function exited with code: <${code}> (0: success, 1: failure).`);
+            setTimeout(validate_connection_and_scan, SCAN_INTERVAL);
+        });
+    }
+)
+set_base_network_config.on('exit', function(code) {
+    /* Begin Logging */
+    console.log(`[${get_timestamp()}] <get device set_base_network_config id> command line function exited with code: <${code}> (0: success, 1: failure).`);
 });
 
-get_id.on('exit', function(code) {
-    /* Begin Logging */
-    console.log(`[${get_timestamp()}] <get device serial id> command line function exited with code: <${code}> (0: success, 1: failure).`);
-    setTimeout(validate_connection_and_scan, SCAN_INTERVAL);
-});
