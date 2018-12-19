@@ -1,7 +1,5 @@
 
 let request = require('request');
-let Promise = require('bluebird');
-let cmd = require('node-cmd');
 
 let i2c = require('i2c-bus');
 let oled = require('oled-i2c-bus');
@@ -32,7 +30,6 @@ class Display {
  *Enable promises for node-cmd with bluebird.<Promise> 
  */
 const SCAN_INTERVAL = 5000, 
-getAsync = Promise.promisify(cmd.get, { multiArgs: true, context: cmd });
 
 const display = Display();
 display.write_text(`Initialising Safedome Bluetooth Scanner.`);
@@ -63,15 +60,14 @@ post_data = (data, cb) => {
 
 /* Scan and log devices*/
 scan = () => {
-    getAsync('sudo btmgmt find').then(data => {
-        console.log(`[${get_timestamp()}] <${data}>`);
 
-        data = data.split("\n");
+    dir = exec("sudo btmgmt find", function(_, stdout, _) {
+        let data = stdout.split("\n");
 
         /* remove first two and last one element(s) from data array */
         data = data.splice(2);
         data.splice(-1);
-        
+
         /* format into devices array */
         let devices = new Array();
         let current_device = "";
@@ -101,17 +97,12 @@ scan = () => {
             "devices": results,
             "timestamp": get_timestamp()
         };
+    });
+      
+    dir.on('exit', function (code) {
+        console.log(`[${get_timestamp()}] command line function exited with code: <${code}>.`);
+    });
 
-        /* Log data with server */
-        // post_data(
-        //     payload,
-        //     () => {setTimeout(scan, SCAN_INTERVAL);}
-        // )
-    }).catch(err => {
-        /* Log exceptions */
-        console.error(`[${get_timestamp()}]`, err);
-        setTimeout(scan, SCAN_INTERVAL);
-    });    
 };
 
 /* Begin Logging */
