@@ -78,7 +78,7 @@ let validate_connection_and_scan = () => {
                 let network_ssid_check = exec("iwgetid | sed 's/ //g' | cut -d ':' -f2'", function(_, stdout, stderr) {
                     // fetch network.
                     display.write_text(`Attempting to fetch preconfigured network.`);
-                    await request.get(`http://54.79.120.135/safedome/test/data.php?mode=wifi_get&d=${serial_id}`, function cb(err, _, body){
+                    request.get(`http://54.79.120.135/safedome/test/data.php?mode=wifi_get&d=${serial_id}`, function cb(err, _, body){
                         if (err) {
                             display.write_text(`Couldnt fetch preconfigured network\nAttempt ${pre_configured_attempt} of 3`);
                             pre_configured_attempt++;
