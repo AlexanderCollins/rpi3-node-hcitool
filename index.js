@@ -5,6 +5,8 @@ const { exec } = require('child_process');
 let i2c = require('i2c-bus');
 let oled = require('oled-i2c-bus');
 
+let waiting_for_network_counter = 0;
+
 let base_network_config = "ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\ncountry=AU\n\nnetwork={\n\tssid='safedome0123'\n\tpsk='safe0123'\n\tkey_mgmt=WPA-PSK\n}\n\n";
 
 /* initalise serial id */
@@ -118,10 +120,28 @@ let validate_connection_and_scan = () => {
         } else {
             console.log(`[${get_timestamp()}] Waiting for network.`);
             display.write_text(`Waiting for network ssid: safedome0123 pass: safe0123\nor configured network.`);
-            setTimeout(
-                validate_connection_and_scan,
-                SCAN_INTERVAL
-            )
+            waiting_for_network_counter++;
+            if(waiting_for_network_counter > 200) {
+                waiting_for_network_counter = 0;
+            }
+            if(waiting_for_network_counter % 10 == 0){
+                display.write_text(`Waiting for network ssid: safedome0123 pass: safe0123\nor configured network.\nRestarting wifi module.`);
+                let cmd = exec("sudo ifconfig wlan0 down && sleep 5 && sudo ifconfig wlan0 up", function(_, stdout, __) {
+                    setTimeout(
+                        validate_connection_and_scan,
+                        SCAN_INTERVAL
+                    )
+                });
+                cmd.on('exit', function (code) {
+                    console.log(`[${get_timestamp()}] <wlan up/down cmd> command line function exited with code: <${code}> (0: success, 1: failure).`);
+                });
+            } else {
+                setTimeout(
+                    validate_connection_and_scan,
+                    SCAN_INTERVAL
+                )
+            }
+            
         }
     });
 
