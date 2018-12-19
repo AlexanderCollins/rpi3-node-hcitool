@@ -80,6 +80,15 @@ let validate_connection_and_scan = () => {
             // Check if network is the hotspot.
             if(pre_configured_attempt <= 3){
                 let network_ssid_check = exec("iwgetid | sed 's/ //g' | cut -d ':' -f2'", function(_, stdout, stderr) {
+
+                    if(stdout !== 'safedome0123'){
+                        console.log(`[${get_timestamp()}] success, onnected to a network not safedome hotspot.`);
+                        return setTimeout(
+                            scan,
+                            SCAN_INTERVAL
+                        );
+                    }
+
                     // fetch network.
                     display.write_text(`Attempting to fetch preconfigured network.`);
                     pre_configured_attempt++;
