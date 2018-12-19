@@ -46,6 +46,7 @@ let get_timestamp = () => {
 
 /* Log data with server */
 async function post_data(data){
+    let error = false;
     data.devices.map(async (device) => {
         await request.post(
             {
@@ -56,13 +57,40 @@ async function post_data(data){
             function optionalCallback(err, _, body) {
                 if (err) {
                     console.error(`[${get_timestamp()}]`, err);
+                    error = true;
                     return;
                 }
                 console.log(`[${get_timestamp()}] Logged <${data.devices.length}> devices. Response from server: <${body}>.`);
             }
         );
-    })
+    });
+    return error;
 };
+
+let validate_connection_and_scan = () => {
+    let validation_check = exec("ping -q -w 1 -c 1 `ip r | grep default | cut -d ' ' -f 3` > /dev/null && echo ok || echo error", function(_, stdout, __){
+        if(stdout == "ok") {
+            console.log(`[${get_timestamp()}] Found Network`);
+            setTimeout(
+                scan,
+                SCAN_INTERVAL
+            )
+        } else {
+            console.log(`[${get_timestamp()}] Waiting for network.`);
+            display.write_text(`${serial_id}\nWaiting for network ssid: safedome0123 pass: Safe0123 or other preconfigured.`);
+            setTimeout(
+                validate_connection_and_scan,
+                SCAN_INTERVAL
+            )
+        }
+
+    });
+
+    validation_check.on('exit', function (code) {
+        console.log(`[${get_timestamp()}] <validation_check> command line function exited with code: <${code}> (0: success, 1: failure).`);
+    });
+
+}
 
 /* Scan and log devices*/
 let scan = () => {
@@ -112,7 +140,10 @@ let scan = () => {
             };
             console.log(`[${get_timestamp()}] ${JSON.stringify(payload)}`);
             display.write_text(`${serial_id}\nLogging ${results.length} safedome devices.`);
-            post_data(payload);
+            let error = post_data(payload);
+            if(error){
+                return setTimeout(validate_connection_and_scan, SCAN_INTERVAL);
+            }
             display.write_text(`${serial_id}\nLogged ${results.length} safedome devices.`);
         }
 
@@ -137,5 +168,5 @@ let get_id = exec("sudo cat /proc/cpuinfo | grep Serial | sed 's/ //g' | cut -d 
 get_id.on('exit', function(code) {
     /* Begin Logging */
     console.log(`[${get_timestamp()}] <get device serial id> command line function exited with code: <${code}> (0: success, 1: failure).`);
-    setTimeout(scan, SCAN_INTERVAL);
+    setTimeout(validate_connection_and_scan, SCAN_INTERVAL);
 });
