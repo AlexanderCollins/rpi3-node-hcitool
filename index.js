@@ -124,8 +124,8 @@ let validate_connection_and_scan = () => {
             if(waiting_for_network_counter > 200) {
                 waiting_for_network_counter = 0;
             }
-            if(waiting_for_network_counter % 10 == 0){
-                display.write_text(`Waiting for network ssid: safedome0123 pass: safe0123\nor configured network.\nRestarting wifi module.`);
+            if(waiting_for_network_counter % 20 == 0){
+                display.write_text(`Waiting for network, restarting wifi module to check.`);
                 let cmd = exec("sudo ifconfig wlan0 down && sleep 5 && sudo ifconfig wlan0 up", function(_, stdout, __) {
                     setTimeout(
                         validate_connection_and_scan,
@@ -217,7 +217,7 @@ let scan = () => {
 
 /* set the base network config if its not set */
 let set_base_network_config = exec(
-    `if grep -q safedome "/etc/wpa_supplicant/wpa_supplicant.conf"; then $(echo "${base_network_config}" > ./temp.conf && sudo cp ./temp.conf /etc/wpa_supplicant/wpa_supplicant.conf && sudo ifconfig wlan0 down && sudo ifconfig wlan0 up) ; fi`,
+    `if grep -q safedome "/etc/wpa_supplicant/wpa_supplicant.conf"; then echo ""; else echo "${base_network_config}" > ./temp.conf && sudo cp ./temp.conf /etc/wpa_supplicant/wpa_supplicant.conf && sudo ifconfig wlan0 down && sudo ifconfig wlan0 up; fi`,
     function(_, stdout, stderr) {
         console.log(stdout);
         console.log(stderr);
