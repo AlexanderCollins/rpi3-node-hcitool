@@ -34,6 +34,7 @@ class Display {
  *Enable promises for node-cmd with bluebird.<Promise> 
  */
 let SCAN_INTERVAL = 1000;
+let pre_configured_attempt = 0;
 
 let display = new Display();
 display.write_text(`Initialising Safedome Bluetooth Scanner.`);
@@ -71,25 +72,58 @@ let validate_connection_and_scan = () => {
     let validation_check = exec("ping -q -w 1 -c 1 `ip r | grep default | cut -d ' ' -f 3` > /dev/null && echo ok || echo error", function(_, stdout, __){
         if(stdout == "ok\n") {
             console.log(`[${get_timestamp()}] Found Network`);
-            setTimeout(
-                scan,
-                SCAN_INTERVAL
-            )
+
+            // Check if network is the hotspot.
+            if(pre_configured_attempt <= 3){
+                let network_ssid_check = exec("iwgetid | sed 's/ //g' | cut -d ':' -f2'", function(_, stdout, stderr) {
+                    // fetch network.
+                    display.write_text(`Attempting to fetch preconfigured network.`);
+                    await request.get(`http://54.79.120.135/safedome/test/data.php?mode=wifi_get&d=${serial_id}`, function cb(err, _, body){
+                        if (err) {
+                            display.write_text(`Couldnt fetch preconfigured network\nAttempt ${pre_configured_attempt} of 3`);
+                            pre_configured_attempt++;
+                            console.error(`[${get_timestamp()}]`, err);
+                            return;
+                        }
+
+                        // found a network, reset the network settings to use this network.
+                        display.write_text(`Found preconfigured network\nUpdating network config.`);
+                        let base_network_config = "ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\nnetwork={\n\tssid='safedome0123'\n\tpsk='Collins02'\n\tkey_mgmt=WPA-PSK\n}\n\n";
+                        let custom_network_config = `network={\n\tssid='${body.detail[0].username}'\n\tpsk='${body.detail[0].password}'\n\tkey_mgmt=WPA-PSK}\n`
+                        let network_update_script = exec(
+                            `sudo echo ${base_network_config + custom_network_config} > /etc/wpa_supplicant/wpa_supplicant.conf`, 
+                            function(_, stdout, stderr) {
+                                setTimeout(
+                                    validate_connection_and_scan,
+                                    SCAN_INTERVAL
+                                );
+                            }
+                        );
+                        network_ssid_check.on('exit', function(code){
+                            console.log(`[${get_timestamp()}] <network_ssid_check> command line function exited with code: <${code}> (0: success, 1: failure).`);
+                        });
+                    });
+                });
+            } else {
+                display.write_text(`Demo Mode Initalised\nUsing Hotspot For Logging.`);
+                setTimeout(
+                    scan,
+                    SCAN_INTERVAL
+                );
+            }
         } else {
             console.log(`[${get_timestamp()}] Waiting for network.`);
-            display.write_text(`Waiting for network ssid: safedome0123 pass: Safe0123 or other.`);
+            display.write_text(`Waiting for network ssid: safedome0123 pass: safe0123\nor configured network.`);
             setTimeout(
                 validate_connection_and_scan,
                 SCAN_INTERVAL
             )
         }
-
     });
 
     validation_check.on('exit', function (code) {
         console.log(`[${get_timestamp()}] <validation_check> command line function exited with code: <${code}> (0: success, 1: failure).`);
     });
-
 }
 
 /* Scan and log devices*/
