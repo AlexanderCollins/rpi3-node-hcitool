@@ -257,6 +257,7 @@ initial_verification_check.on('exit', function(code) {
 
 
 if(reset_){
+    console.log(`[${get_timestamp()}] COULDNT FIND NON SAFEDOME NETWORK - RESETTING NETWORKS`)
     /* set the base network config if its not set */
     let set_base_network_config = exec(
         `wpa_cli remove_network 0;wpa_cli remove_network 1;wpa_cli remove_network 2;wpa_cli remove_network 3;wpa_cli remove_network 4;wpa_cli remove_network 5;wpa_cli remove_network 6;wpa_cli remove_network 7;wpa_cli remove_network 8;wpa_cli remove_network 9;wpa_cli remove_network 10; wpa_cli save_config; wpa_cli add_network 0; wpa_cli save_config; sudo sh -c 'wpa_passphrase safedome0123 safe0123 >> /etc/wpa_supplicant/wpa_supplicant.conf';sudo systemctl daemon-reload; sudo systemctl restart dhcpcd;`,
@@ -283,5 +284,18 @@ if(reset_){
         console.log(`[${get_timestamp()}] <get device set_base_network_config id> command line function exited with code: <${code}> (0: success, 1: failure).`);
     });
 } else {
-    setTimeout(validate_connection_and_scan, SCAN_INTERVAL);
+    console.log(`[${get_timestamp()}] FOUND NON SAFEDOME NETWORK`)
+    /* Get the serial number */
+    let get_id = exec("sudo cat /proc/cpuinfo | grep Serial | sed 's/ //g' | cut -d ':' -f2", function(_, stdout, stderr) {
+        console.log(`[${get_timestamp()}] Found device serial id ${stdout}.`);
+        serial_id = stdout;
+        serial_id = serial_id.replace('\n', '');
+        return;
+    });
+
+    get_id.on('exit', function(code) {
+        /* Begin Logging */
+        console.log(`[${get_timestamp()}] <get device serial id> command line function exited with code: <${code}> (0: success, 1: failure).`);
+        setTimeout(validate_connection_and_scan, SCAN_INTERVAL);
+    });
 }
