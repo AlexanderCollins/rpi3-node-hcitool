@@ -45,22 +45,23 @@ let get_timestamp = () => {
 
 
 /* Log data with server */
-post_data = (data, cb) => {
-    request.post(
-        {
-            url: "https://",
-            method: "POST",
-            json: data
-        }, 
-        function optionalCallback(err, _, body) {
-            if (err) {
-                console.error(`[${get_timestamp()}]`, err);
-                return cb();
+post_data = async (data) => {
+    data.devices.map((device) => {
+        await request.post(
+            {
+                url: `http://54.79.120.135/safedome/test/data.php?mode=insert&note=1&device=${data.device}&address=${device.hex_id}&value=${device.rssi}`,
+                method: "POST",
+                json: data
+            }, 
+            function optionalCallback(err, _, body) {
+                if (err) {
+                    console.error(`[${get_timestamp()}]`, err);
+                    return;
+                }
+                console.log(`[${get_timestamp()}] Logged <${data.devices.length}> devices. Response from server: <${body}>.`);
             }
-            console.log(`[${get_timestamp()}] Logged <${data.devices.length}> devices. Response from server: <${body}>.`);
-            cb();
-        }
-    );
+        );
+    })
 },
 
 /* Scan and log devices*/
@@ -110,6 +111,9 @@ scan = () => {
                 "device": serial_id
             };
             console.log(`[${get_timestamp()}] ${JSON.stringify(payload)}`);
+            display.write_text(`${serial_id}\nLogging ${results.length} safedome devices.`);
+            post_data(payload);
+            display.write_text(`${serial_id}\nLogged ${results.length} safedome devices.`);
         }
 
         setTimeout(scan, SCAN_INTERVAL);
