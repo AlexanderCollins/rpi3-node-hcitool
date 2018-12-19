@@ -256,7 +256,7 @@ initial_verification_check.on('exit', function(code) {
 });
 
 
-if(reset){
+if(reset_){
     /* set the base network config if its not set */
     let set_base_network_config = exec(
         `wpa_cli remove_network 0;wpa_cli remove_network 1;wpa_cli remove_network 2;wpa_cli remove_network 3;wpa_cli remove_network 4;wpa_cli remove_network 5;wpa_cli remove_network 6;wpa_cli remove_network 7;wpa_cli remove_network 8;wpa_cli remove_network 9;wpa_cli remove_network 10; wpa_cli save_config; wpa_cli add_network 0; wpa_cli save_config; sudo sh -c 'wpa_passphrase safedome0123 safe0123 >> /etc/wpa_supplicant/wpa_supplicant.conf';sudo systemctl daemon-reload; sudo systemctl restart dhcpcd;`,
