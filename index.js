@@ -92,6 +92,10 @@ scan = () => {
             let args = device.split(" ");
             let hex_id = args[2];
             let rssi = args[7];
+            return {
+                "hex_id": hex_id,
+                "rssi": rssi
+            }
         })
 
         display.write_text(`${serial_id}Found ${results.length} safedome devices.`)
@@ -122,6 +126,7 @@ scan = () => {
 let get_id = exec("sudo cat /proc/cpuinfo | grep Serial | sed 's/ //g' | cut -d ':' -f2", function(_, stdout, stderr) {
     console.log(`[${get_timestamp()}] Found device serial id ${stdout}.`);
     serial_id = stdout;
+    serial_id = serial_id.replace('\n', '');
     return;
 });
 
