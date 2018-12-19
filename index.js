@@ -110,7 +110,7 @@ let validate_connection_and_scan = () => {
                             console.log(`[${get_timestamp()}] <network_update_script> command line function exited with code: <${code}> (0: success, 1: failure).`);
                         });
                     });
-                    network_update_script.on('exit', function(code){
+                    network_ssid_check.on('exit', function(code){
                         console.log(`[${get_timestamp()}] <network_ssid_check> command line function exited with code: <${code}> (0: success, 1: failure).`);
                     });
                 });
