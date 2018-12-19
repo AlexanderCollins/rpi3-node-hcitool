@@ -90,7 +90,10 @@ let validate_connection_and_scan = () => {
                         // found a network, reset the network settings to use this network.
                         display.write_text(`Found preconfigured network\nUpdating network config.`);
                         let base_network_config = "ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\ncountry=AU\n\nnetwork={\n\tssid='safedome0123'\n\tpsk='Collins02'\n\tkey_mgmt=WPA-PSK\n}\n\n";
-                        let custom_network_config = `network={\n\tssid='${body.detail[0].username}'\n\tpsk='${body.detail[0].password}'\n\tkey_mgmt=WPA-PSK\n}\n`
+                        let custom_network_config = `network={\n\tssid='${body.detail[0].username}'\n\tpsk='${body.detail[0].password}'\n\tkey_mgmt=WPA-PSK\n}\n`;
+                        
+                        console.log(base_network_config+custom_network_config);
+
                         console.log("calling network update script");
                         let network_update_script = exec(
                             `sudo echo ${base_network_config + custom_network_config} > /etc/wpa_supplicant/wpa_supplicant.conf`, 
