@@ -70,7 +70,7 @@ async function post_data(data){
 let validate_connection_and_scan = () => {
     let validation_check = exec("ping -q -w 1 -c 1 `ip r | grep default | cut -d ' ' -f 3` > /dev/null && echo ok || echo error", function(_, stdout, __){
         console.log(stdout)
-        if(stdout == "ok") {
+        if(stdout == "ok\n") {
             console.log(`[${get_timestamp()}] Found Network`);
             setTimeout(
                 scan,
