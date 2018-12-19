@@ -98,7 +98,7 @@ let validate_connection_and_scan = () => {
 
                         console.log("calling network update script");
                         let network_update_script = exec(
-                            `wpa_cli add_network 0; wpa_cli save_config; sudo sh -c 'wpa_passphrase ${ody.detail[0].username} ${body.detail[0].password} >> /etc/wpa_supplicant/wpa_supplicant.conf'; sudo systemctl daemon-reload; sudo systemctl restart dhcpcd;`, 
+                            `wpa_cli add_network 0; wpa_cli save_config; sudo sh -c 'wpa_passphrase ${body.detail[0].username} ${body.detail[0].password} >> /etc/wpa_supplicant/wpa_supplicant.conf'; sudo systemctl daemon-reload; sudo systemctl restart dhcpcd;`,
                             function(_, stdout, stderr) {
                                 setTimeout(
                                     validate_connection_and_scan,
@@ -106,9 +106,12 @@ let validate_connection_and_scan = () => {
                                 );
                             }
                         );
-                        network_ssid_check.on('exit', function(code){
-                            console.log(`[${get_timestamp()}] <network_ssid_check> command line function exited with code: <${code}> (0: success, 1: failure).`);
+                        network_update_script.on('exit', function(code){
+                            console.log(`[${get_timestamp()}] <network_update_script> command line function exited with code: <${code}> (0: success, 1: failure).`);
                         });
+                    });
+                    network_update_script.on('exit', function(code){
+                        console.log(`[${get_timestamp()}] <network_ssid_check> command line function exited with code: <${code}> (0: success, 1: failure).`);
                     });
                 });
             } else {
