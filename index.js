@@ -231,29 +231,57 @@ let scan = () => {
 };
 
 
-/* set the base network config if its not set */
-let set_base_network_config = exec(
-    `wpa_cli remove_network 0;wpa_cli remove_network 1;wpa_cli remove_network 2;wpa_cli remove_network 3;wpa_cli remove_network 4;wpa_cli remove_network 5;wpa_cli remove_network 6;wpa_cli remove_network 7;wpa_cli remove_network 8;wpa_cli remove_network 9;wpa_cli remove_network 10; wpa_cli save_config; wpa_cli add_network 0; wpa_cli save_config; sudo sh -c 'wpa_passphrase safedome0123 safe0123 >> /etc/wpa_supplicant/wpa_supplicant.conf';sudo systemctl daemon-reload; sudo systemctl restart dhcpcd;`,
-    function(_, stdout, stderr) {
-        console.log(stdout);
-        console.log(stderr);
-        /* Get the serial number */
-        let get_id = exec("sudo cat /proc/cpuinfo | grep Serial | sed 's/ //g' | cut -d ':' -f2", function(_, stdout, stderr) {
-            console.log(`[${get_timestamp()}] Found device serial id ${stdout}.`);
-            serial_id = stdout;
-            serial_id = serial_id.replace('\n', '');
-            return;
-        });
+let reset_ = false;
 
-        get_id.on('exit', function(code) {
-            /* Begin Logging */
-            console.log(`[${get_timestamp()}] <get device serial id> command line function exited with code: <${code}> (0: success, 1: failure).`);
-            setTimeout(validate_connection_and_scan, SCAN_INTERVAL);
+/* Check if connected to non-safedome network */
+let initial_verification_check = exec("ping -q -w 1 -c 1 `ip r | grep default | cut -d ' ' -f 3` > /dev/null && echo ok || echo error", function(_, stdout, __){
+    if(stdout == "ok\n") {
+        let initial_network_ssid_check = exec("iwgetid", function(_, stdout, stderr) {
+            if(stdout.indexOf('safedome0123') === -1){
+                console.log(`[${get_timestamp()}] connected to ${stdout}`);
+                display.write_text(`Conneted to: ${stdout.replace(/\s/g,'').split(":")[1]}`);
+            } else {
+                reset_ = true;
+            }
         });
+        initial_network_ssid_check.on('exit', function(code){
+            console.log(`[${get_timestamp()}] <initial_network_ssid_check> command line function exited with code: <${code}> (0: success, 1: failure).`);
+        });
+    } else {
+        reset_ = true;
     }
-)
-set_base_network_config.on('exit', function(code) {
-    /* Begin Logging */
-    console.log(`[${get_timestamp()}] <get device set_base_network_config id> command line function exited with code: <${code}> (0: success, 1: failure).`);
+});
+initial_verification_check.on('exit', function(code) {
+    console.log(`[${get_timestamp()}] <initial verification check> command line function exited with code: <${code}> (0: success, 1: failure).`);
 });
 
+
+if(reset){
+    /* set the base network config if its not set */
+    let set_base_network_config = exec(
+        `wpa_cli remove_network 0;wpa_cli remove_network 1;wpa_cli remove_network 2;wpa_cli remove_network 3;wpa_cli remove_network 4;wpa_cli remove_network 5;wpa_cli remove_network 6;wpa_cli remove_network 7;wpa_cli remove_network 8;wpa_cli remove_network 9;wpa_cli remove_network 10; wpa_cli save_config; wpa_cli add_network 0; wpa_cli save_config; sudo sh -c 'wpa_passphrase safedome0123 safe0123 >> /etc/wpa_supplicant/wpa_supplicant.conf';sudo systemctl daemon-reload; sudo systemctl restart dhcpcd;`,
+        function(_, stdout, stderr) {
+            console.log(stdout);
+            console.log(stderr);
+            /* Get the serial number */
+            let get_id = exec("sudo cat /proc/cpuinfo | grep Serial | sed 's/ //g' | cut -d ':' -f2", function(_, stdout, stderr) {
+                console.log(`[${get_timestamp()}] Found device serial id ${stdout}.`);
+                serial_id = stdout;
+                serial_id = serial_id.replace('\n', '');
+                return;
+            });
+
+            get_id.on('exit', function(code) {
+                /* Begin Logging */
+                console.log(`[${get_timestamp()}] <get device serial id> command line function exited with code: <${code}> (0: success, 1: failure).`);
+                setTimeout(validate_connection_and_scan, SCAN_INTERVAL);
+            });
+        }
+    )
+    set_base_network_config.on('exit', function(code) {
+        /* Begin Logging */
+        console.log(`[${get_timestamp()}] <get device set_base_network_config id> command line function exited with code: <${code}> (0: success, 1: failure).`);
+    });
+} else {
+    setTimeout(validate_connection_and_scan, SCAN_INTERVAL);
+}
