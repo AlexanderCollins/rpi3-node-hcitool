@@ -41,11 +41,11 @@ display.write_text(`Initialising Safedome Bluetooth Scanner.`);
 let get_timestamp = () => {
     /* Format current datetime to human readable timestamp. */
     return (new Date()).toJSON().slice(0, 19).replace(/[-T]/g, ':');
-},
+};
 
 
 /* Log data with server */
-post_data = async (data) => {
+async function post_data(data){
     data.devices.map((device) => {
         await request.post(
             {
@@ -62,10 +62,10 @@ post_data = async (data) => {
             }
         );
     })
-},
+};
 
 /* Scan and log devices*/
-scan = () => {
+let scan = () => {
     display.write_text(`${serial_id}\nScanning for devices.`);
     let dir = exec("sudo btmgmt find", function(_, stdout, __) {
         let data = stdout.split("\n");
