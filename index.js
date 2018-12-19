@@ -79,9 +79,9 @@ let validate_connection_and_scan = () => {
 
             // Check if network is the hotspot.
             if(pre_configured_attempt <= 3){
-                let network_ssid_check = exec("iwgetid | sed 's/ //g' | cut -d ':' -f2'", function(_, stdout, stderr) {
+                let network_ssid_check = exec("iwgetid", function(_, stdout, stderr) {
                     console.log(stdout);
-                    if(stdout !== '"safedome0123"'){
+                    if(stdout.indexOf('safedome0123') === -1){
                         console.log(`[${get_timestamp()}] success, connected to a network which is not the safedome0123 hotspot.`);
                         return setTimeout(
                             scan,
