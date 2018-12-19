@@ -100,6 +100,8 @@ let validate_connection_and_scan = () => {
                         let network_update_script = exec(
                             `wpa_cli add_network 0; wpa_cli save_config; sudo sh -c 'wpa_passphrase ${body.detail[0].username} ${body.detail[0].password} >> /etc/wpa_supplicant/wpa_supplicant.conf'; sudo systemctl daemon-reload; sudo systemctl restart dhcpcd;`,
                             function(_, stdout, stderr) {
+                                console.log(stdout);
+                                console.log(stderr);
                                 setTimeout(
                                     validate_connection_and_scan,
                                     10000
@@ -128,7 +130,7 @@ let validate_connection_and_scan = () => {
             if(waiting_for_network_counter > 200) {
                 waiting_for_network_counter = 0;
             }
-            if(waiting_for_network_counter % 20 == 0){
+            if(waiting_for_network_counter % 30 == 0){
                 display.write_text(`Waiting for network, restarting wifi module to check.`);
                 let cmd = exec("sudo ifconfig wlan0 down && sleep 5 && sudo ifconfig wlan0 up", function(_, stdout, __) {
                     setTimeout(
