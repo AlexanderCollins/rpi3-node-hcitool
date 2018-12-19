@@ -1,7 +1,6 @@
 
 let request = require('request');
 const { exec } = require('child_process');
-
 let i2c = require('i2c-bus');
 let oled = require('oled-i2c-bus');
 
@@ -80,7 +79,6 @@ let validate_connection_and_scan = () => {
             // Check if network is the hotspot.
             if(pre_configured_attempt <= 3){
                 let network_ssid_check = exec("iwgetid", function(_, stdout, stderr) {
-                    console.log(stdout);
                     if(stdout.indexOf('safedome0123') === -1){
                         console.log(`[${get_timestamp()}] connected to ${stdout}`);
                         display.write_text(`Conneted to: ${stdout.replace(/\s/g,'').split(":")[1]}`);
@@ -110,8 +108,6 @@ let validate_connection_and_scan = () => {
                         let network_update_script = exec(
                             `wpa_cli add_network 0; wpa_cli save_config; sudo sh -c 'wpa_passphrase ${body.detail[0].username} ${body.detail[0].password} >> /etc/wpa_supplicant/wpa_supplicant.conf'; sudo systemctl daemon-reload; sudo systemctl restart dhcpcd;`,
                             function(_, stdout, stderr) {
-                                console.log(stdout);
-                                console.log(stderr);
                                 setTimeout(
                                     validate_connection_and_scan,
                                     10000
@@ -262,8 +258,6 @@ if(reset_){
     let set_base_network_config = exec(
         `wpa_cli remove_network 0;wpa_cli remove_network 1;wpa_cli remove_network 2;wpa_cli remove_network 3;wpa_cli remove_network 4;wpa_cli remove_network 5;wpa_cli remove_network 6;wpa_cli remove_network 7;wpa_cli remove_network 8;wpa_cli remove_network 9;wpa_cli remove_network 10; wpa_cli save_config; wpa_cli add_network 0; wpa_cli save_config; sudo sh -c 'wpa_passphrase safedome0123 safe0123 >> /etc/wpa_supplicant/wpa_supplicant.conf';sudo systemctl daemon-reload; sudo systemctl restart dhcpcd;`,
         function(_, stdout, stderr) {
-            console.log(stdout);
-            console.log(stderr);
             /* Get the serial number */
             let get_id = exec("sudo cat /proc/cpuinfo | grep Serial | sed 's/ //g' | cut -d ':' -f2", function(_, stdout, stderr) {
                 console.log(`[${get_timestamp()}] Found device serial id ${stdout}.`);
