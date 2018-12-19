@@ -83,7 +83,7 @@ let validate_connection_and_scan = () => {
                     console.log(stdout);
                     if(stdout.indexOf('safedome0123') === -1){
                         console.log(`[${get_timestamp()}] connected to ${stdout}`);
-                        display.write_text(`Conneted to: <${stdout.replace(/\s/g,'')}>`);
+                        display.write_text(`Conneted to: <${stdout.replace(/\s/g,'').split(":")[1]}>`);
                         return setTimeout(
                             scan,
                             SCAN_INTERVAL
