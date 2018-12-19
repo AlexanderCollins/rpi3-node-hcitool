@@ -81,7 +81,7 @@ let validate_connection_and_scan = () => {
                 let network_ssid_check = exec("iwgetid", function(_, stdout, stderr) {
                     if(stdout.indexOf('safedome0123') === -1){
                         console.log(`[${get_timestamp()}] connected to ${stdout}`);
-                        display.write_text(`Conneted to: ${stdout.replace(/\s/g,'').split(":")[1].replace("\"", "")}`);
+                        display.write_text(`Conneted to: ${stdout.replace(/\s/g,'').split(":")[1].replace("\"", "").replace("\"", "")}`);
                         return setTimeout(
                             scan,
                             SCAN_INTERVAL
@@ -235,7 +235,7 @@ let initial_verification_check = exec("ping -q -w 1 -c 1 `ip r | grep default | 
         let initial_network_ssid_check = exec("iwgetid", function(_, stdout, stderr) {
             if(stdout.indexOf('safedome0123') === -1){
                 console.log(`[${get_timestamp()}] connected to ${stdout}`);
-                display.write_text(`Conneted to: ${stdout.replace(/\s/g,'').split(":")[1]}`);
+                display.write_text(`Conneted to: ${stdout.replace(/\s/g,'').split(":")[1].replace("\"", "").replace("\"", "")}`);
             } else {
                 reset_ = true;
             }
