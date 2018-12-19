@@ -21,7 +21,7 @@ class Display {
     write_text(_text){
         this.oled.clearDisplay();
         this.oled.setCursor(1, 1);
-        this.oled.writeString(font, 1, _text, 1, true);
+        this.oled.writeString(this.font, 1, _text, 1, true);
     }
 }
 
