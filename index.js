@@ -30,7 +30,7 @@ class Display {
  * Define the interval between scans in MS and,
  *Enable promises for node-cmd with bluebird.<Promise> 
  */
-let SCAN_INTERVAL = 5000;
+let SCAN_INTERVAL = 1000;
 
 let display = new Display();
 display.write_text(`Initialising Safedome Bluetooth Scanner.`);
@@ -61,7 +61,7 @@ post_data = (data, cb) => {
 
 /* Scan and log devices*/
 scan = () => {
-
+    display.write_text(`Scanning for safedome devices ...`);
     let dir = exec("sudo btmgmt find", function(_, stdout, _) {
         let data = stdout.split("\n");
 
@@ -93,11 +93,14 @@ scan = () => {
         display.write_text(`Found ${results.length} safedome devices.`)
 
         /* todo - parse data from hcitool */
+        if(results.length > 0){
+            let payload = {
+                "devices": results,
+                "timestamp": get_timestamp()
+            };
+        }
 
-        let payload = {
-            "devices": results,
-            "timestamp": get_timestamp()
-        };
+        setTimeout(scan, SCAN_INTERVAL);
     });
       
     dir.on('exit', function (code) {
