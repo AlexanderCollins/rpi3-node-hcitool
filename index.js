@@ -29,9 +29,9 @@ class Display {
  * Define the interval between scans in MS and,
  *Enable promises for node-cmd with bluebird.<Promise> 
  */
-const SCAN_INTERVAL = 5000, 
+let SCAN_INTERVAL = 5000;
 
-const display = Display();
+let display = Display();
 display.write_text(`Initialising Safedome Bluetooth Scanner.`);
 
 let get_timestamp = () => {
