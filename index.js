@@ -1,5 +1,6 @@
 
 let request = require('request');
+const { exec } = require('child_process');
 
 let i2c = require('i2c-bus');
 let oled = require('oled-i2c-bus');
