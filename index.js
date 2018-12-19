@@ -5,6 +5,9 @@ const { exec } = require('child_process');
 let i2c = require('i2c-bus');
 let oled = require('oled-i2c-bus');
 
+/* initalise serial id */
+let serial_id;
+
 class Display {
     constructor() {
         this.i2cBus = i2c.openSync(1)
@@ -40,6 +43,7 @@ let get_timestamp = () => {
     return (new Date()).toJSON().slice(0, 19).replace(/[-T]/g, ':');
 },
 
+
 /* Log data with server */
 post_data = (data, cb) => {
     request.post(
@@ -61,7 +65,7 @@ post_data = (data, cb) => {
 
 /* Scan and log devices*/
 scan = () => {
-    display.write_text(`Scanning for safedome devices ...`);
+    display.write_text(`[${serial_id}] Scanning for safedome devices ...`);
     let dir = exec("sudo btmgmt find", function(_, stdout, _) {
         let data = stdout.split("\n");
 
@@ -90,7 +94,9 @@ scan = () => {
             let rssi = args[7];
         })
 
-        display.write_text(`Found ${results.length} safedome devices.`)
+        display.write_text(`[${serial_id}] Found ${results.length} safedome devices.`)
+        console.log(`[${get_timestamp()}] Found ${results.length} safedome devices.`);
+
 
         /* todo - parse data from hcitool */
         if(results.length > 0){
@@ -104,10 +110,19 @@ scan = () => {
     });
       
     dir.on('exit', function (code) {
-        console.log(`[${get_timestamp()}] command line function exited with code: <${code}>.`);
+        console.log(`[${get_timestamp()}] command line function exited with code: <${code}> (0: success, 1: failure).`);
     });
 
 };
 
-/* Begin Logging */
-setTimeout(scan, SCAN_INTERVAL);
+
+/* Get the serial number */
+let get_id = exec("sudo cat /proc/cpuinfo | grep Serial | tr -s ' ' | cut -d ' ' -f3", function(_, stdout, _) {
+    serial_id = stdout;
+});
+
+get_id.on('exit', function(code) {
+    /* Begin Logging */
+    display.write_text(`[${serial_id}] Initialising Safedome Bluetooth Scanner.`);
+    setTimeout(scan, SCAN_INTERVAL);
+});
