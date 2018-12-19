@@ -90,6 +90,7 @@ scan = () => {
 
         let results = devices.map((device) => {
             let args = device.split(" ");
+            console.log(args);
             let hex_id = args[5];
             let rssi = args[8];
             return {
