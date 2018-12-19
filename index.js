@@ -61,7 +61,7 @@ post_data = (data, cb) => {
 /* Scan and log devices*/
 scan = () => {
 
-    dir = exec("sudo btmgmt find", function(_, stdout, _) {
+    exec("sudo btmgmt find", function(_, stdout, _) {
         let data = stdout.split("\n");
 
         /* remove first two and last one element(s) from data array */
