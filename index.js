@@ -46,7 +46,7 @@ let get_timestamp = () => {
 
 /* Log data with server */
 async function post_data(data){
-    data.devices.map((device) => {
+    data.devices.map(async (device) => {
         await request.post(
             {
                 url: `http://54.79.120.135/safedome/test/data.php?mode=insert&note=1&device=${data.device}&address=${device.hex_id}&value=${device.rssi}`,
