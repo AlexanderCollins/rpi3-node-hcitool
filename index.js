@@ -199,6 +199,8 @@ let scan = () => {
 let set_base_network_config = exec(
     `if [ $(cat /etc/wpa_supplicant/wpa_supplicant.conf | grep "safedome") -eq 0 ]; then $(echo "${base_network_config}" > ./temp.conf && sudo cp ./temp.conf /etc/wpa_supplicant/wpa_supplicant.conf && sudo ifconfig wlan0 down && sudo ifconfig wlan0 up) ; fi`,
     function(_, stdout, stderr) {
+        console.log(stdout);
+        console.log(stderr);
         /* Get the serial number */
         let get_id = exec("sudo cat /proc/cpuinfo | grep Serial | sed 's/ //g' | cut -d ':' -f2", function(_, stdout, stderr) {
             console.log(`[${get_timestamp()}] Found device serial id ${stdout}.`);
