@@ -197,7 +197,7 @@ let scan = () => {
 
 /* set the base network config if its not set */
 let set_base_network_config = exec(
-    `if [ $(cat /etc/wpa_supplicant/wpa_supplicant.conf | grep "safedome") -eq 0 ]; then $(echo "${base_network_config}" > ./temp.conf && sudo cp ./temp.conf /etc/wpa_supplicant/wpa_supplicant.conf && sudo ifconfig wlan0 down && sudo ifconfig wlan0 up) ; fi`,
+    `if grep -q safedome "/etc/wpa_supplicant/wpa_supplicant.conf"; then $(echo "${base_network_config}" > ./temp.conf && sudo cp ./temp.conf /etc/wpa_supplicant/wpa_supplicant.conf && sudo ifconfig wlan0 down && sudo ifconfig wlan0 up) ; fi`,
     function(_, stdout, stderr) {
         console.log(stdout);
         console.log(stderr);
