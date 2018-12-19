@@ -65,7 +65,7 @@ post_data = (data, cb) => {
 
 /* Scan and log devices*/
 scan = () => {
-    display.write_text(`${serial_id}\nScanning for safedome devices ...`);
+    display.write_text(`${serial_id}\nScanning for devices.`);
     let dir = exec("sudo btmgmt find", function(_, stdout, __) {
         let data = stdout.split("\n");
 
@@ -90,8 +90,8 @@ scan = () => {
 
         let results = devices.map((device) => {
             let args = device.split(" ");
-            let hex_id = args[2];
-            let rssi = args[7];
+            let hex_id = args[7];
+            let rssi = args[8];
             return {
                 "hex_id": hex_id,
                 "rssi": rssi
