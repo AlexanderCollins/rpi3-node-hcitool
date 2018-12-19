@@ -65,7 +65,7 @@ post_data = (data, cb) => {
 
 /* Scan and log devices*/
 scan = () => {
-    display.write_text(`[${serial_id}] Scanning for safedome devices ...`);
+    display.write_text(`${serial_id} Scanning for safedome devices ...`);
     let dir = exec("sudo btmgmt find", function(_, stdout, __) {
         let data = stdout.split("\n");
 
@@ -94,7 +94,7 @@ scan = () => {
             let rssi = args[7];
         })
 
-        display.write_text(`[${serial_id}] Found ${results.length} safedome devices.`)
+        display.write_text(`${serial_id} Found ${results.length} safedome devices.`)
         console.log(`[${get_timestamp()}] Found ${results.length} safedome devices.`);
 
 
@@ -118,15 +118,14 @@ scan = () => {
 
 /* Get the serial number */
 let get_id = exec("sudo cat /proc/cpuinfo | grep Serial | sed 's/ //g' | cut -d ':' -f2", function(_, stdout, stderr) {
-    console.log(stdout);
-    console.log(stderr);
+    console.log(`[${get_timestamp()}] Found device serial id ${stdout}.`);
     serial_id = stdout;
-    console.log(stderr);
+    return;
 });
 
 get_id.on('exit', function(code) {
     /* Begin Logging */
     console.log(`[${get_timestamp()}] <get device serial id> command line function exited with code: <${code}> (0: success, 1: failure).`);
-    display.write_text(`[${serial_id}] Initialising Safedome Bluetooth Scanner.`);
+    display.write_text(`${serial_id} Initialising Safedome Bluetooth Scanner.`);
     setTimeout(scan, SCAN_INTERVAL);
 });
