@@ -12,7 +12,7 @@ class Display {
             height: 32,
             address: 0x3C
         };
-        this.oled = new oled(i2cBus, opts);
+        this.oled = new oled(this.i2cBus, this.opts);
         this.font = require('oled-font-5x7');
         this.oled.clearDisplay();
         this.oled.turnOnDisplay();
