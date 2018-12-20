@@ -99,6 +99,7 @@ let validate_connection_and_scan = () => {
                             display.write_text(`Couldnt fetch preconfigured network\nAttempt ${pre_configured_attempt} of 3`);
                             return;
                         }
+                        console.log(body);
 
                         // found a network, reset the network settings to use this network.
                         display.write_text(`Found preconfigured network\nUpdating network config.`);
