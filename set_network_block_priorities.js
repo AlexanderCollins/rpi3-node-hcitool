@@ -22,13 +22,13 @@ function update_supplicant(network_block_count) {
     }
 
     // write out the new supplicant file to a temp file.
-    let write_out_to_temp = exec(`sudo touch temp.conf && sudo echo '${new_array.join("\n")}' > ./temp.conf`, function(_, stdout, __){
+    let write_out_to_temp = exec(`echo '${new_array.join("\n")}' > temp.conf`, function(_, stdout, __){
         console.log(stdout);
-        let copy_temp_to_supplicant = exec("", function(_, stdout, __){
+        let copy_temp_to_supplicant = exec("sudo cp ./temp.conf /etc/wpa_supplicant/wpa_supplicant.conf", function(_, stdout, __){
             console.log(stdout);
         });
 
-        copy_temp_to_supplicant.on('sudo cp ./temp.conf /etc/wpa_supplicant/wpa_supplicant.conf', function (code) {
+        copy_temp_to_supplicant.on('exit', function (code) {
             console.log(`[${get_timestamp()}] <copy_temp_to_supplicant> command line function exited with code: <${code}> (0: success, 1: failure).`);
         });
     });
