@@ -123,10 +123,11 @@ let validate_connection_and_scan = () => {
                     });
                 });
             } else {
-                display.write_text(`Demo Mode Initalised\nUsing Hotspot For Logging.`);
+                display.write_text(`Demo Mode Initalised\nUsing Safedome Hotspot For Logging.`);
+                pre_configured_attempt = 0;
                 setTimeout(
                     scan,
-                    SCAN_INTERVAL
+                    SCAN_INTERVAL + 5000
                 );
             }
         } else {
