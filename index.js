@@ -233,7 +233,8 @@ let initial_verification_check = exec("ping -q -w 1 -c 1 `ip r | grep default | 
         /* set the base network config if its not set */
         let set_base_network_config = exec(
             `./remove_all_networks.sh && ./add_safedome_hotspot_network.sh && ./reload_wpa_supplicant.sh`,
-            function(_, stdout, stderr) {
+            function(_, stdout, __) {
+                console.log(stdout);
                 /* Get the serial number */
                 let get_id = exec("sudo cat /proc/cpuinfo | grep Serial | sed 's/ //g' | cut -d ':' -f2", function(_, stdout, stderr) {
                     console.log(`[${get_timestamp()}] Found device serial id ${stdout}.`);
