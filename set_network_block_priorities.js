@@ -15,7 +15,7 @@ function update_supplicant(network_block_count) {
     /* Iterate over each line in the existing wpa_supplicant file and add priority to each network block */
     for(var index = 0; index < array.length; ++index) {
         if(array[index].indexOf('}') !== -1){
-            new_array.push(`\tpriority=${network_block_count - priority_count}`);
+            new_array.push(`\tpriority=${network_block_count + priority_count}`);
             priority_count++;
         }
         new_array.push(array[index]);
