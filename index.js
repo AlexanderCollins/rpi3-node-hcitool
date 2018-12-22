@@ -34,7 +34,7 @@ class Display {
  * Define the interval between scans in MS and,
  *Enable promises for node-cmd with bluebird.<Promise> 
  */
-let SCAN_INTERVAL = 1000;
+let SCAN_INTERVAL = 50;
 let pre_configured_attempt = 0;
 
 let display = new Display();
@@ -102,7 +102,7 @@ let validate_connection_and_scan = () => {
                         display.write_text(`Found preconfigured network\nUpdating network config.`);
                         console.log("calling network update script");
                         let network_update_script = exec(
-                            `./remove_all_networks.sh && ./add_new_network.sh ${body.detail[0].username} ${body.detail[0].password} && ./add_safedome_hotspot_network.sh && ./reload_wpa_supplicant.sh`,
+                            `./remove_all_networks.sh && ./add_new_network.sh "${body.detail[0].username}" "${body.detail[0].password}" && ./add_safedome_hotspot_network.sh && node set_network_block_priorities.js && ./reload_wpa_supplicant.sh`,
                             function(_, stdout, stderr) {
                                 setTimeout(
                                     validate_connection_and_scan,
