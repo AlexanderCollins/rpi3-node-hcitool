@@ -2,10 +2,8 @@
 let request = require('request');
 const { exec } = require('child_process');
 let i2c = require('i2c-bus');
-this.font = require('oled-font-5x7');
-let oled = require('oled-i2c-bus');
 
-let waiting_for_network_counter = 0;
+let oled = require('oled-i2c-bus');
 
 /* initalise serial id */
 let serial_id;
@@ -19,12 +17,13 @@ class Display {
             address: 0x3C
         };
         this.oled = new oled(this.i2cBus, this.opts);
+        this.font = require('oled-font-5x7');
     }
 
     initaliseDisplay(){
+        this.oled.turnOffDisplay();
         this.oled.turnOnDisplay();
         this.oled.clearDisplay();
-        this.oled.invertDisplay(true);
         this.oled.setCursor(1, 1);
     }
 
