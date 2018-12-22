@@ -7,7 +7,6 @@ let oled = require('oled-i2c-bus');
 let waiting_for_network_counter = 0;
 /* initalise serial id */
 let serial_id;
-let DEMO_MODE = false;
 
 class Display {
     constructor() {
@@ -19,11 +18,10 @@ class Display {
         };
         this.oled = new oled(this.i2cBus, this.opts);
         this.font = require('oled-font-5x7');
+        this.oled.turnOnDisplay();
     }
 
     initaliseDisplay(){
-        this.oled.turnOffDisplay();
-        this.oled.turnOnDisplay();
         this.oled.clearDisplay();
         this.oled.setCursor(1, 1);
     }
@@ -89,7 +87,6 @@ let validate_connection_and_scan = () => {
                     if(stdout.indexOf('safedome0123') === -1){
                         console.log(`[${get_timestamp()}] connected to ${stdout}`);
                         display.write_text(`Conneted to: ${stdout.replace(/\s/g,'').split(":")[1].replace("\"", "").replace("\"", "")}`);
-                        DEMO_MODE = false;
                         return setTimeout(
                             scan,
                             SCAN_INTERVAL
@@ -130,7 +127,6 @@ let validate_connection_and_scan = () => {
                 });
             } else {
                 display.write_text(`Demo Mode Initalised\nUsing Safedome Hotspot For Logging.`);
-                DEMO_MODE = true;
                 pre_configured_attempt = 0;
                 setTimeout(
                     scan,
@@ -156,11 +152,7 @@ let validate_connection_and_scan = () => {
 
 /* Scan and log devices*/
 let scan = () => {
-    let demo_mode_string = "";
-    if(DEMO_MODE) {
-        demo_mode_string = "\nDEMO MODE"
-    }
-    display.write_text(`${serial_id}\nScanning for devices.${demo_mode_string}`);
+    display.write_text(`${serial_id}\nScanning for devices.`);
     let dir = exec("sudo btmgmt find", function(_, stdout, __) {
         let data = stdout.split("\n");
 
