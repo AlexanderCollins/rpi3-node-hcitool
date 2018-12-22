@@ -6,8 +6,6 @@ let oled = require('oled-i2c-bus');
 
 let waiting_for_network_counter = 0;
 
-let base_network_config = "ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\ncountry=AU\n\nnetwork={\n\tssid='safedome0123'\n\tpsk='safe0123'\n\tkey_mgmt=WPA-PSK\n}\n\n";
-
 /* initalise serial id */
 let serial_id;
 
@@ -102,12 +100,9 @@ let validate_connection_and_scan = () => {
 
                         // found a network, reset the network settings to use this network.
                         display.write_text(`Found preconfigured network\nUpdating network config.`);
-
-                        //let custom_network_config = `network={\n\tssid='${body.detail[0].username}'\n\tpsk='${body.detail[0].password}'\n\tkey_mgmt=WPA-PSK\n}\n`;
-
                         console.log("calling network update script");
                         let network_update_script = exec(
-                            `wpa_cli add_network 0; wpa_cli save_config; sudo sh -c 'wpa_passphrase ${body.detail[0].username} ${body.detail[0].password} >> /etc/wpa_supplicant/wpa_supplicant.conf'; sudo systemctl daemon-reload; sudo systemctl restart dhcpcd;`,
+                            `./remove_all_networks.sh && ./add_new_network.sh ${body.detail[0].username} ${body.detail[0].password} && ./add_safedome_hotspot_network.sh && ./reload_wpa_supplicant.sh`,
                             function(_, stdout, stderr) {
                                 setTimeout(
                                     validate_connection_and_scan,
@@ -257,7 +252,7 @@ if(reset_){
     console.log(`[${get_timestamp()}] COULDNT FIND NON SAFEDOME NETWORK - RESETTING NETWORKS`)
     /* set the base network config if its not set */
     let set_base_network_config = exec(
-        `wpa_cli remove_network 0;wpa_cli remove_network 1;wpa_cli remove_network 2;wpa_cli remove_network 3;wpa_cli remove_network 4;wpa_cli remove_network 5;wpa_cli remove_network 6;wpa_cli remove_network 7;wpa_cli remove_network 8;wpa_cli remove_network 9;wpa_cli remove_network 10; wpa_cli save_config; wpa_cli add_network 0; wpa_cli save_config; sudo sh -c 'wpa_passphrase safedome0123 safe0123 >> /etc/wpa_supplicant/wpa_supplicant.conf';sudo systemctl daemon-reload; sudo systemctl restart dhcpcd;`,
+        `./remove_all_networks.sh && ./add_safedome_hotspot_network.sh && ./reload_wpa_supplicant.sh`,
         function(_, stdout, stderr) {
             /* Get the serial number */
             let get_id = exec("sudo cat /proc/cpuinfo | grep Serial | sed 's/ //g' | cut -d ':' -f2", function(_, stdout, stderr) {
