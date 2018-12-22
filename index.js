@@ -89,7 +89,7 @@ let validate_connection_and_scan = () => {
                         display.write_text(`Conneted to: ${stdout.replace(/\s/g,'').split(":")[1].replace("\"", "").replace("\"", "")}`);
                         return setTimeout(
                             scan,
-                            SCAN_INTERVAL
+                            SCAN_INTERVAL + 1000
                         );
                     }
 
@@ -205,7 +205,7 @@ let scan = () => {
             display.write_text(`${serial_id}\nLogged ${results.length} safedome devices.`);
         }
 
-        setTimeout(scan, SCAN_INTERVAL);
+        setTimeout(scan, SCAN_INTERVAL + 1000);
     });
       
     dir.on('exit', function (code) {
