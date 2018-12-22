@@ -23,8 +23,14 @@ function update_supplicant(network_block_count) {
     console.log(new_array);
 
     // write out the new supplicant file to a temp file.
-    let write_out_to_temp = exec(`echo '${new_array.join("\n")}' > temp.conf`, function(_, stdout, __){
-        console.log(stdout);
+    let write_out_to_temp = exec(`echo '' > temp.conf`, function(_, stdout, __){
+        
+        var stream = fs.createWriteStream("temp.conf");
+        stream.once('open', function(_) {
+            stream.write(new_array.join("\n"));
+            stream.end();
+        });
+
         let copy_temp_to_supplicant = exec("sudo cp ./temp.conf /etc/wpa_supplicant/wpa_supplicant.conf", function(_, stdout, __){
             console.log(stdout);
         });
