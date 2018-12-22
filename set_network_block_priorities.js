@@ -20,28 +20,16 @@ function update_supplicant(network_block_count) {
         }
         new_array.push(array[index]);
     }
-    console.log(new_array);
 
-    // write out the new supplicant file to a temp file.
-    let write_out_to_temp = exec(`echo '' > temp.conf`, function(_, stdout, __){
-        
-        var stream = fs.createWriteStream("temp.conf");
-        stream.once('open', function(_) {
-            stream.write(new_array.join("\n"));
-            stream.end();
-        });
 
-        let copy_temp_to_supplicant = exec("sudo cp ./temp.conf /etc/wpa_supplicant/wpa_supplicant.conf", function(_, stdout, __){
-            console.log(stdout);
-        });
+    fs.writeFileSync('temp.conf', new_array.join("\n"), 'utf8');
 
-        copy_temp_to_supplicant.on('exit', function (code) {
-            console.log(`[${get_timestamp()}] <copy_temp_to_supplicant> command line function exited with code: <${code}> (0: success, 1: failure).`);
-        });
+    let copy_temp_to_supplicant = exec("sudo cp ./temp.conf /etc/wpa_supplicant/wpa_supplicant.conf", function(_, stdout, __){
+        console.log(stdout);
     });
 
-    write_out_to_temp.on('exit', function (code) {
-        console.log(`[${get_timestamp()}] <write_out_to_temp> command line function exited with code: <${code}> (0: success, 1: failure).`);
+    copy_temp_to_supplicant.on('exit', function (code) {
+        console.log(`[${get_timestamp()}] <copy_temp_to_supplicant> command line function exited with code: <${code}> (0: success, 1: failure).`);
     });
 }
 
