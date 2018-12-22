@@ -64,7 +64,11 @@ async function post_data(data){
                 if (err) {
                     console.error(`[${get_timestamp()}]`, err);
                     error = true;
-                    return;
+                    display.write_text(`Couldnt logg data\nWaiting for network:\n${body.detail[0].username}`);
+                    setTimeout(
+                        validate_connection_and_scan,
+                        10000
+                    );
                 }
                 console.log(`[${get_timestamp()}] Logged <${data.devices.length}> devices. Response from server: <${body}>.`);
             }
@@ -244,7 +248,7 @@ let initial_verification_check = exec("ping -q -w 1 -c 1 `ip r | grep default | 
         console.log(`[${get_timestamp()}] COULDNT FIND NON SAFEDOME NETWORK - RESETTING NETWORKS`)
         /* set the base network config if its not set */
         let set_base_network_config = exec(
-            `./remove_all_networks.sh && ./add_safedome_hotspot_network.sh && ./reload_wpa_supplicant.sh && sleep 15000`,
+            `./remove_all_networks.sh && ./add_safedome_hotspot_network.sh && ./reload_wpa_supplicant.sh && sleep 15`,
             function(_, stdout, __) {
                 console.log(stdout);
                 /* Get the serial number */
