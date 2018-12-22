@@ -7,7 +7,7 @@ let oled = require('oled-i2c-bus');
 
 /* initalise serial id */
 let serial_id;
-let demo_mode = false;
+let DEMO_MODE = false;
 
 class Display {
     constructor() {
@@ -85,7 +85,7 @@ let validate_connection_and_scan = () => {
                     if(stdout.indexOf('safedome0123') === -1){
                         console.log(`[${get_timestamp()}] connected to ${stdout}`);
                         display.write_text(`Conneted to: ${stdout.replace(/\s/g,'').split(":")[1].replace("\"", "").replace("\"", "")}`);
-                        demo_mode = false;
+                        DEMO_MODE = false;
                         return setTimeout(
                             scan,
                             SCAN_INTERVAL
@@ -126,7 +126,7 @@ let validate_connection_and_scan = () => {
                 });
             } else {
                 display.write_text(`Demo Mode Initalised\nUsing Safedome Hotspot For Logging.`);
-                demo_mode = true;
+                DEMO_MODE = true;
                 pre_configured_attempt = 0;
                 setTimeout(
                     scan,
@@ -152,7 +152,11 @@ let validate_connection_and_scan = () => {
 
 /* Scan and log devices*/
 let scan = () => {
-    display.write_text(`${serial_id}\nScanning for devices.${demo_mode ? '\n[DEMO MODE]' : ''}`);
+    let demo_mode_string = "";
+    if(DEMO_MODE) {
+        demo_mode_string = "\nDEMO MODE"
+    }
+    display.write_text(`${serial_id}\nScanning for devices.${demo_mode_string}`);
     let dir = exec("sudo btmgmt find", function(_, stdout, __) {
         let data = stdout.split("\n");
 
