@@ -4,7 +4,7 @@ const { exec } = require('child_process');
 let i2c = require('i2c-bus');
 
 let oled = require('oled-i2c-bus');
-
+let waiting_for_network_counter = 0;
 /* initalise serial id */
 let serial_id;
 let DEMO_MODE = false;
