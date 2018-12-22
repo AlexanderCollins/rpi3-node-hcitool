@@ -1,4 +1,4 @@
-
+#!/bin/bash
 
 # removing all networks
 NETWORK_COUNT=$(cat /etc/wpa_supplicant/wpa_supplicant.conf | grep network | wc -l);
