@@ -127,29 +127,13 @@ let validate_connection_and_scan = () => {
             }
         } else {
             console.log(`[${get_timestamp()}] Waiting for network.`);
-            display.write_text(`Waiting for network ssid: safedome0123 pass: safe0123\nor configured network.`);
+            display.write_text(`Waiting for network ssid: safedome0123 pass: safe0123\nor other pre-configured network.`);
             waiting_for_network_counter++;
-            if(waiting_for_network_counter > 200) {
-                waiting_for_network_counter = 0;
-            }
-            if(waiting_for_network_counter % 30 == 0){
-                display.write_text(`Waiting for network, restarting wifi module to check.`);
-                let cmd = exec("sudo ifconfig wlan0 down && sleep 5 && sudo ifconfig wlan0 up", function(_, stdout, __) {
-                    setTimeout(
-                        validate_connection_and_scan,
-                        SCAN_INTERVAL
-                    )
-                });
-                cmd.on('exit', function (code) {
-                    console.log(`[${get_timestamp()}] <wlan up/down cmd> command line function exited with code: <${code}> (0: success, 1: failure).`);
-                });
-            } else {
-                setTimeout(
-                    validate_connection_and_scan,
-                    SCAN_INTERVAL
-                )
-            }
-            
+
+            setTimeout(
+                validate_connection_and_scan,
+                SCAN_INTERVAL
+            )
         }
     });
 
@@ -228,10 +212,10 @@ let reset_ = false;
 /* Check if connected to non-safedome network */
 let initial_verification_check = exec("ping -q -w 1 -c 1 `ip r | grep default | cut -d ' ' -f 3` > /dev/null && echo ok || echo error", function(_, stdout, __){
     if(stdout == "ok\n") {
-        let initial_network_ssid_check = exec("iwgetid", function(_, stdout, stderr) {
+        let initial_network_ssid_check = exec("iwgetid", function(_, stdout, __) {
             if(stdout.indexOf('safedome0123') === -1){
                 console.log(`[${get_timestamp()}] connected to ${stdout}`);
-                display.write_text(`Conneted to: ${stdout.replace(/\s/g,'').split(":")[1].replace("\"", "").replace("\"", "")}`);
+                display.write_text(`Connected To Network\n${stdout.replace(/\s/g,'').split(":")[1].replace("\"", "").replace("\"", "")}`);
             } else {
                 reset_ = true;
             }
@@ -242,50 +226,53 @@ let initial_verification_check = exec("ping -q -w 1 -c 1 `ip r | grep default | 
     } else {
         reset_ = true;
     }
+
+
+    if(reset_){
+        console.log(`[${get_timestamp()}] COULDNT FIND NON SAFEDOME NETWORK - RESETTING NETWORKS`)
+        /* set the base network config if its not set */
+        let set_base_network_config = exec(
+            `./remove_all_networks.sh && ./add_safedome_hotspot_network.sh && ./reload_wpa_supplicant.sh`,
+            function(_, stdout, stderr) {
+                /* Get the serial number */
+                let get_id = exec("sudo cat /proc/cpuinfo | grep Serial | sed 's/ //g' | cut -d ':' -f2", function(_, stdout, stderr) {
+                    console.log(`[${get_timestamp()}] Found device serial id ${stdout}.`);
+                    serial_id = stdout;
+                    serial_id = serial_id.replace('\n', '');
+                    return;
+                });
+    
+                get_id.on('exit', function(code) {
+                    /* Begin Logging */
+                    console.log(`[${get_timestamp()}] <get device serial id> command line function exited with code: <${code}> (0: success, 1: failure).`);
+                    setTimeout(validate_connection_and_scan, SCAN_INTERVAL);
+                });
+            }
+        )
+        set_base_network_config.on('exit', function(code) {
+            /* Begin Logging */
+            console.log(`[${get_timestamp()}] <get device set_base_network_config id> command line function exited with code: <${code}> (0: success, 1: failure).`);
+        });
+    } else {
+        console.log(`[${get_timestamp()}] FOUND NON SAFEDOME NETWORK`)
+        /* Get the serial number */
+        let get_id = exec("sudo cat /proc/cpuinfo | grep Serial | sed 's/ //g' | cut -d ':' -f2", function(_, stdout, stderr) {
+            console.log(`[${get_timestamp()}] Found device serial id ${stdout}.`);
+            serial_id = stdout;
+            serial_id = serial_id.replace('\n', '');
+            return;
+        });
+    
+        get_id.on('exit', function(code) {
+            /* Begin Logging */
+            console.log(`[${get_timestamp()}] <get device serial id> command line function exited with code: <${code}> (0: success, 1: failure).`);
+            setTimeout(validate_connection_and_scan, SCAN_INTERVAL);
+        });
+    }
 });
 initial_verification_check.on('exit', function(code) {
     console.log(`[${get_timestamp()}] <initial verification check> command line function exited with code: <${code}> (0: success, 1: failure).`);
 });
 
 
-if(reset_){
-    console.log(`[${get_timestamp()}] COULDNT FIND NON SAFEDOME NETWORK - RESETTING NETWORKS`)
-    /* set the base network config if its not set */
-    let set_base_network_config = exec(
-        `./remove_all_networks.sh && ./add_safedome_hotspot_network.sh && ./reload_wpa_supplicant.sh`,
-        function(_, stdout, stderr) {
-            /* Get the serial number */
-            let get_id = exec("sudo cat /proc/cpuinfo | grep Serial | sed 's/ //g' | cut -d ':' -f2", function(_, stdout, stderr) {
-                console.log(`[${get_timestamp()}] Found device serial id ${stdout}.`);
-                serial_id = stdout;
-                serial_id = serial_id.replace('\n', '');
-                return;
-            });
 
-            get_id.on('exit', function(code) {
-                /* Begin Logging */
-                console.log(`[${get_timestamp()}] <get device serial id> command line function exited with code: <${code}> (0: success, 1: failure).`);
-                setTimeout(validate_connection_and_scan, SCAN_INTERVAL);
-            });
-        }
-    )
-    set_base_network_config.on('exit', function(code) {
-        /* Begin Logging */
-        console.log(`[${get_timestamp()}] <get device set_base_network_config id> command line function exited with code: <${code}> (0: success, 1: failure).`);
-    });
-} else {
-    console.log(`[${get_timestamp()}] FOUND NON SAFEDOME NETWORK`)
-    /* Get the serial number */
-    let get_id = exec("sudo cat /proc/cpuinfo | grep Serial | sed 's/ //g' | cut -d ':' -f2", function(_, stdout, stderr) {
-        console.log(`[${get_timestamp()}] Found device serial id ${stdout}.`);
-        serial_id = stdout;
-        serial_id = serial_id.replace('\n', '');
-        return;
-    });
-
-    get_id.on('exit', function(code) {
-        /* Begin Logging */
-        console.log(`[${get_timestamp()}] <get device serial id> command line function exited with code: <${code}> (0: success, 1: failure).`);
-        setTimeout(validate_connection_and_scan, SCAN_INTERVAL);
-    });
-}
