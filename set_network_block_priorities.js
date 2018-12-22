@@ -20,6 +20,7 @@ function update_supplicant(network_block_count) {
         }
         new_array.push(array[index]);
     }
+    console.log(new_array);
 
     // write out the new supplicant file to a temp file.
     let write_out_to_temp = exec(`echo '${new_array.join("\n")}' > temp.conf`, function(_, stdout, __){
