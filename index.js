@@ -91,7 +91,7 @@ let validate_connection_and_scan = () => {
                     }
 
                     // fetch network.
-                    display.write_text(`Attempting to fetch preconfigured network.`);
+                    display.write_text(`Fetching preconfigured network.`);
                     pre_configured_attempt++;
                     request.get(`http://54.79.120.135/safedome/test/data.php?mode=wifi_get&d=${serial_id}`, function cb(err, _, body){
                         body = JSON.parse(body)
@@ -102,11 +102,12 @@ let validate_connection_and_scan = () => {
                         }
 
                         // found a network, reset the network settings to use this network.
-                        display.write_text(`Found preconfigured network\nUpdating network config.`);
-                        console.log("calling network update script");
+                        display.write_text(`Fetched preconfigured network\nUpdating network config.`);
+                        console.log(`[${get_timestamp()}] Calling network update script`);
                         let network_update_script = exec(
                             `./remove_all_networks.sh && ./add_new_network.sh "${body.detail[0].username}" "${body.detail[0].password}" && ./add_safedome_hotspot_network.sh && node set_network_block_priorities.js && ./reload_wpa_supplicant.sh`,
                             function(_, stdout, stderr) {
+                                display.write_text(`Waiting for network:\n${body.detail[0].username}`);
                                 setTimeout(
                                     validate_connection_and_scan,
                                     10000
