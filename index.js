@@ -134,7 +134,7 @@ let validate_connection_and_scan = () => {
                 pre_configured_attempt = 0;
                 setTimeout(
                     scan,
-                    SCAN_INTERVAL + 5000
+                    SCAN_INTERVAL + 1000
                 );
             }
         } else {
@@ -234,7 +234,7 @@ let initial_verification_check = exec("ping -q -w 1 -c 1 `ip r | grep default | 
                 display.write_text(`Connected To Network\n${stdout.replace(/\s/g,'').split(":")[1].replace("\"", "").replace("\"", "")}`);
             } else {
                 /* Started up and is connected to a safe dome network */
-                //reset_ = true;
+                reset_ = true;
             }
         });
         initial_network_ssid_check.on('exit', function(code){
