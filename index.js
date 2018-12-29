@@ -62,7 +62,7 @@ async function post_data(data){
                 if (err) {
                     console.error(`[${get_timestamp()}]`, err);
                     error = true;
-                    display.write_text(`Couldnt logg data\nWaiting for network:\n${body.detail[0].username}`);
+                    display.write_text(`Couldnt log data`);
                     setTimeout(
                         validate_connection_and_scan,
                         10000
@@ -97,7 +97,11 @@ let validate_connection_and_scan = () => {
                     display.write_text(`Fetching preconfigured network.`);
                     pre_configured_attempt++;
                     request.get(`http://54.79.120.135/safedome/test/data.php?mode=wifi_get&d=${serial_id}`, function cb(err, _, body){
-                        body = JSON.parse(body)
+                        try {
+                            body = JSON.parse(body)
+                        } catch(e) {
+                            return;
+                        }
                         if (err) {
                             console.error(`[${get_timestamp()}]`, err);
                             display.write_text(`Couldnt fetch preconfigured network\nAttempt ${pre_configured_attempt} of 3`);
@@ -219,20 +223,26 @@ let reset_ = false;
 
 /* Check if connected to non-safedome network */
 let initial_verification_check = exec("ping -q -w 1 -c 1 `ip r | grep default | cut -d ' ' -f 3` > /dev/null && echo ok || echo error", function(_, stdout, __){
+    
+    
+    /**/
     if(stdout == "ok\n") {
         let initial_network_ssid_check = exec("iwgetid", function(_, stdout, __) {
+            // connected to pre configured network
             if(stdout.indexOf('safedome0123') === -1){
                 console.log(`[${get_timestamp()}] connected to ${stdout}`);
                 display.write_text(`Connected To Network\n${stdout.replace(/\s/g,'').split(":")[1].replace("\"", "").replace("\"", "")}`);
             } else {
-                reset_ = true;
+                /* Started up and is connected to a safe dome network */
+                //reset_ = true;
             }
         });
         initial_network_ssid_check.on('exit', function(code){
             console.log(`[${get_timestamp()}] <initial_network_ssid_check> command line function exited with code: <${code}> (0: success, 1: failure).`);
         });
     } else {
-        reset_ = true;
+        // case where no internet connection on startup
+        //reset_ = true
     }
 
 

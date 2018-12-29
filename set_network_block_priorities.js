@@ -44,3 +44,4 @@ let network_count_command = exec("cat /etc/wpa_supplicant/wpa_supplicant.conf | 
 network_count_command.on('exit', function (code) {
     console.log(`[${get_timestamp()}] <network_count_command> command line function exited with code: <${code}> (0: success, 1: failure).`);
 });
+
